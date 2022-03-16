@@ -16,6 +16,7 @@ class CreateExamTypesTable extends Migration
         Schema::create('exam_types', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->boolean('is_mark')->default(0);
             $table->timestamps();
         });
     }

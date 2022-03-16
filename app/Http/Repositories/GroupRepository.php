@@ -5,6 +5,7 @@ namespace App\Http\Repositories;
 use App\Http\Interfaces\GroupInterface;
 use App\Http\Interfaces\TeachersInterface;
 use App\Http\Traits\ApiDesignTrait;
+use App\Http\Traits\UploadImageTrait;
 use App\Models\Group;
 
 
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Hash;
 class GroupRepository implements GroupInterface {
 
     use ApiDesignTrait;
+    use UploadImageTrait;
 
 
 
@@ -35,7 +37,7 @@ class GroupRepository implements GroupInterface {
        $validation = Validator::make($request->all(),[
            'name' => 'required|min:3',
            'body' => 'required',
-           'image' => 'required',
+           'image' => 'required|mimes:png,jpg,jpeg|max:2048',
            'teacher_id' => 'required|exists:users,id',
        ]);
 
@@ -47,7 +49,7 @@ class GroupRepository implements GroupInterface {
        $this->groupModel::create([
            'name' => $request->name,
            'body' => $request->body,
-           'image' => $request->image,
+           'image' => $this->uploadImage($request, 'group_image'),
            'teacher_id' => $request->teacher_id,
            'created_by' => auth()->user()->id,
        ]);
@@ -103,25 +105,30 @@ class GroupRepository implements GroupInterface {
 
     public function updateGroup($request){
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|min:3',
-            'body' => 'required',
-            'image' => 'required',
-            'teacher_id' => 'required|exists:users,id',
-        ]);
+        $group = $this->groupModel::find($request->group_id);
 
-        if($validator->fails()){
-            return $this->ApiResponse(422, 'Validation Errors', $validator->errors());
+        if($request->image){
+            $this->deleteImage('group_image', $group->image);
+            $group->update([
+                'image' => $this->uploadImage($request, 'task_image')
+            ]);
         }
 
-        $group = $this->groupModel::find($request->group_id);
+//        $validator = Validator::make($request->all(), [
+//            'name' => 'required|min:3',
+//            'body' => 'required',
+//            'teacher_id' => 'required|exists:users,id',
+//        ]);
+//
+//        if($validator->fails()){
+//            return $this->ApiResponse(422, 'Validation Errors', $validator->errors());
+//        }
 
         if($group){
 
             $group->update([
                 'name' => $request->name,
                 'body' => $request->body,
-                'image' => $request->image,
                 'teacher_id' => $request->teacher_id,
             ]);
 

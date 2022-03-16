@@ -40,16 +40,20 @@ class EndUserRepository implements EndUserInterface {
         // TODO: Implement userGroups() method.
 
 
+//        dd('zz');
 
 
         $userId = auth()->user()->id;
         $userRole = auth()->user()->roleName->name;
+//        dd($userId);
+//        dd($userRole);
 
         if($userRole == 'Teacher'){
 
             $data = $this->groupModel->where('teacher_id', $userId)
                 ->withCount('groupStudents')
                 ->get();
+//            dd($data);
 
         }elseif($userRole == 'Student'){
 
@@ -63,7 +67,7 @@ class EndUserRepository implements EndUserInterface {
 
         }
 
-        return $this->ApiResponse(200, 'Done', $data);
+        return $this->ApiResponse(200, 'Done', null, $data);
 
     }
 }

@@ -64,8 +64,10 @@ class ExamRepository implements ExamInterface
         // TODO: Implement allExams() method.
 
         $userId = auth()->user()->id;
+//        dd($userId);
         $userRole = auth()->user()->roleName->name;
 
+//        dd($userRole);
 
         if ($userRole == 'Teacher') {
 
@@ -105,7 +107,7 @@ class ExamRepository implements ExamInterface
         }
 
 
-        $this->exam->create([
+        $exam = $this->exam->create([
             'name' => $request->name,
             'start' => $request->start,
             'end' => $request->end,
@@ -117,7 +119,7 @@ class ExamRepository implements ExamInterface
             'teacher_id' => auth()->id(),
         ]);
 
-        return $this->ApiResponse(200, 'Added Successfully');
+        return $this->ApiResponse(200, 'Added Successfully', null, $exam);
     }
 
 
@@ -131,7 +133,7 @@ class ExamRepository implements ExamInterface
             'end' => 'required',
             'time' => 'required',
             'degree' => 'required',
-            'count' => 'required',
+//            'count' => 'required',
             'exam_id' => 'required|exists:exams,id',
             'group_id' => 'required|exists:groups,id',
 
@@ -150,12 +152,13 @@ class ExamRepository implements ExamInterface
             'end' => $request->end,
             'time' => $request->time,
             'degree' => $request->degree,
-            'count' => $request->count,
+//            'count' => $request->count,
             'group_id' => $request->group_id,
             'teacher_id' => auth()->id(),
         ]);
 
-        return $this->ApiResponse(200, 'Updated Successfully');
+//        dd($exam);
+        return $this->ApiResponse(200, 'Updated Successfully', null, $exam);
     }
 
 
@@ -193,11 +196,12 @@ class ExamRepository implements ExamInterface
         }
 
 
-        $data = $this->exam->find($request->exam_id)->update([
+        $data = $this->exam->find($request->exam_id);
+        $data->update([
             'is_closed' => $request->status,
         ]);
 
-        return $this->ApiResponse(200, 'Exam Status Updated');
+        return $this->ApiResponse(200, 'Exam Status Updated', null, $data);
 
     }
 
@@ -206,10 +210,9 @@ class ExamRepository implements ExamInterface
 
     public function examStudents($request)
     {
+//        dd('aa');
         $validation = Validator::make($request->all(), [
-
             'exam_id' => 'required|exists:exams,id',
-
         ]);
 
         if($validation->fails()){
@@ -217,6 +220,8 @@ class ExamRepository implements ExamInterface
         }
 
 
+//        $exam = $this->exam->find($request->exam_id);
+//        dd($exam);
 
         $data = $this->studentExam::where('exam_id', $request->exam_id)->with('StudentData')->get();
 

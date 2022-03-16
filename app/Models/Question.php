@@ -9,7 +9,9 @@ class Question extends Model
 {
     use HasFactory;
 
-    protected $hidden = ['created_at', 'updated_at', 'exam_id'];
+    protected $fillable = ['title', 'exam_id'];
+
+    protected $hidden = ['created_at', 'updated_at'];
 
     public  function questionImage(){
         return $this->hasOne(QuestionImage::class, 'question_id', 'id');
@@ -21,6 +23,12 @@ class Question extends Model
 
         return $this->hasOne(SystemAnswer::class, 'question_id', 'id');
     }
+
+    public function exams(){
+        return $this->belongsTo(Exam::class, 'exam_id', 'id');
+    }
+
+
 
 }
 

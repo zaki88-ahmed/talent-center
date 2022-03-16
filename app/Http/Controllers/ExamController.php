@@ -43,6 +43,7 @@ class ExamController extends Controller
 
     public function allExams(){
         //dd($request);
+//        dd('cc');
         return $this->examInterface->allExams();
     }
 

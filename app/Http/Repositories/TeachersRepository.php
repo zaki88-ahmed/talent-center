@@ -50,12 +50,16 @@ class TeachersRepository implements TeachersInterface {
 
     public function addTeacher($request){
 
+//        dd('aa');
+        $roleTeacherId = $this->roleModel->where('name', 'Teacher')->first()->id;
+//        dd($roleTeacherId);
+
        $validation = Validator::make($request->all(),[
            'name' => 'required|min:3',
            'phone' => 'required',
            'email' => 'required|email|unique:users',
            'password' => 'required|min:8',
-           'role_id' => 'required|exists:roles,id',
+//           'role_id' => 'required|exists:roles,id',
        ]);
 
        if($validation->fails())
@@ -68,7 +72,7 @@ class TeachersRepository implements TeachersInterface {
            'phone' => $request->phone,
            'email' => $request->email,
            'password' => Hash::make($request->password),
-           'role_id' => $request->role_id,
+           'role_id' => $roleTeacherId,
            'status' => 0,
        ]);
 
@@ -80,7 +84,6 @@ class TeachersRepository implements TeachersInterface {
 
     public function allTeachers(){
 
-
         $is_teacher = 1;
 
         $teachers = $this->userModel::whereHas('roleName', function ($query) use ($is_teacher){
@@ -88,9 +91,7 @@ class TeachersRepository implements TeachersInterface {
         })->with('roleName')->get();
 
         return $this->ApiResponse(200, 'Done', null, $teachers);
-
     }
-
 
 
     public function deleteTeacher($request){
@@ -106,6 +107,8 @@ class TeachersRepository implements TeachersInterface {
         $teacher = $this->userModel::whereHas('roleName', function ($query){
             return $query->where('is_teacher', 1);
         })->find($request->teacher_id);
+
+//        dd($teacher->id);
 
         //dd($staff);
 
@@ -127,12 +130,14 @@ class TeachersRepository implements TeachersInterface {
 
     public function updateTeacher($request){
 
+        $roleTeacherId = $this->roleModel->where('name', 'Teacher')->first()->id;
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|min:3',
             'phone' => 'required',
             'email' => 'required|email|unique:users,email,'.$request->teacher_id,
             'password' => 'required|min:8',
-            'role_id' => 'required|exists:roles,id',
+//            'role_id' => 'required|exists:roles,id',
             'teacher_id' => 'required|exists:users,id',
         ]);
 
@@ -151,7 +156,7 @@ class TeachersRepository implements TeachersInterface {
                 'phone' => $request->phone,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'role_id' => $request->role_id,
+                'role_id' => $roleTeacherId,
                 'status' => 0,
             ]);
 
@@ -164,11 +169,6 @@ class TeachersRepository implements TeachersInterface {
 
 
     }
-
-
-
-
-
 
 
 

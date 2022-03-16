@@ -18,6 +18,8 @@ class CreateRolesTable extends Migration
             $table->string('name');
             $table->boolean('is_teacher')->default(0);
             $table->boolean('is_staff')->default(0);
+            $table->boolean('is_admin')->default(0);
+
 
 
             $table->timestamps();

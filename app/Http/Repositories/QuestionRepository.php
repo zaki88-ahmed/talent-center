@@ -5,6 +5,8 @@ namespace App\Http\Repositories;
 use App\Http\Interfaces\AuthInterface;
 use App\Http\Interfaces\ExamInterface;
 use App\Http\Interfaces\QuestionInterface;
+use App\Http\Resources\Resources\ExamCollection;
+use App\Http\Resources\Resources\QuestionResource;
 use App\Http\Traits\ApiDesignTrait;
 //use App\Models\role;
 use App\Models\Exam;
@@ -22,6 +24,7 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use phpDocumentor\Reflection\Types\Collection;
 
 class QuestionRepository implements QuestionInterface{
 
@@ -77,21 +80,20 @@ class QuestionRepository implements QuestionInterface{
     {
         // TODO: Implement addQuestion() method.
 
+//        dd('cc');
 
         $validator = Validator::make($request->all(),[
 
             'title' => 'required',
-            'exam_id' => 'required|exists:exam,id',
+            'exam_id' => 'required|exists:exams,id',
 
         ]);
-
 
         if($validator->fails()){
             return $this->apiResponse(422,'Errors',$validator->errors());
         }
 
-
-
+//        dd('aa');
 
         $question = $this->question->create([
 
@@ -99,23 +101,24 @@ class QuestionRepository implements QuestionInterface{
             'exam_id' => $request->exam_id,
         ]);
 
-
-
+//        dd('zz');
 
 //        $questionType = $this->examType::where([['is_mark', 1], ['choice', 1]])->first();
 
-        $examType = $this->exam::where(['id', $request->exam_id])->whereHas('examTypes', function ($q) {
-            $q->where([['is_mark', 1], ['choice', 1]]);
-        })->first();
+//        $examType = $this->exam::where(['id', $request->exam_id])->whereHas('examTypes', function ($q) {
+//            $q->where([['is_mark', 1], ['choice', 1]]);
+//        })->first();
+
+//        dd($examType);
 
 
-        if($examType){
-            //Add Choice Answers
-        }
+//        if($examType){
+//            //Add Choice Answers
+//        }
 
-
-
-        $exam = $this->exam->where('id', $request->exam_id)->AutomatedMarked(1)->first();
+//        $exam = $this->exam->where('id', $request->exam_id)->AutomatedMarked(1)->first();
+        $exam = $this->exam->where('id', $request->exam_id)->first();
+//        dd($exam);
 
         if($exam){
 
@@ -130,7 +133,12 @@ class QuestionRepository implements QuestionInterface{
             $this->addQuestionAnswer($request->answer, $question->id);
             }
 
-        return $this->ApiResponse(200, 'Added Successfully');
+//        dd($exam->with('questions'));
+
+//        return $this->ApiResponse(200, 'Added Successfully', null, $exam);
+//        return $this->ApiResponse(200, 'Added Successfully', null, new ExamCollection($exam));
+//        return $this->ApiResponse(200, 'Added Successfully', null, ExamCollection:: collection($exam));
+        return $this->ApiResponse(200, 'Added Successfully', null, new QuestionResource($question));
 
 
     }
@@ -174,7 +182,8 @@ class QuestionRepository implements QuestionInterface{
         }
 
 
-        $question = $this->question->find($request->question_id)->first();
+        $question = $this->question->find($request->question_id);
+//        dd($question->id);
 
 
         $question->update([

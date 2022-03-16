@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class ChoisesAnswer extends Model
 {
     use HasFactory;
+
 }

@@ -22,8 +22,10 @@ class Roles
     {
 
         $userRole = auth()->user()->roleName->name;
+//        dd($userRole);
 
         $allowRoles = explode('.', $roles);
+//        dd($allowRoles);
 
 
         if(!in_array($userRole, $allowRoles)){

@@ -17,5 +17,5 @@ class Role extends Model
         return $this->hasMany(User::class, "role_id", "id");
     }
 
-    protected $hidden = ['created_at', 'updated_at', 'is_staff'];
+    protected $hidden = ['created_at', 'updated_at'];
 }

@@ -20,6 +20,7 @@ class EndUserController extends Controller
 
     public function userGroups(){
 
+//        dd('zz');
         return $this->endUserInterface->userGroups();
     }
 }

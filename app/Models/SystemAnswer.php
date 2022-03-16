@@ -9,5 +9,7 @@ class SystemAnswer extends Model
 {
     use HasFactory;
 
+
+    protected $fillable = ['question_id', 'answer'];
     protected $hidden = ['created_at', 'updated_at'];
 }

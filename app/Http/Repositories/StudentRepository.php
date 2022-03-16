@@ -58,7 +58,7 @@ class StudentRepository implements StudentInterface {
             'phone' => 'required|min:10',
             'password' => 'required',
             'groups.*' => 'required',
-            //'groups' => ['required', new ValidGroupId()],
+//            'groups' => ['required', new ValidGroupId()],
         ]);
 
 
@@ -108,7 +108,7 @@ class StudentRepository implements StudentInterface {
 
 
 
-        $studentRole = $this->roleModel::where([['is_teacher', 0], ['is_staff', 0]])->first();
+        $studentRole = $this->roleModel::where([['is_teacher', 0], ['is_staff', 0], ['is_admin', 0]])->first();
 
         $student = $this->userModel::create([
             'name' => $request->name,
@@ -123,10 +123,10 @@ class StudentRepository implements StudentInterface {
         //dd(count($groups));
 
         for ($i = 0; $i < count($groups); $i++) {
-            //for ($j = $i+1; $j <= count($groups) -1; $j++) {
+//            for ($j = $i+1; $j <= count($groups) -1; $j++) {
 
 
-            //dd($groups[$i+2]);
+//            dd($groups[$i+2]);
 
                 $this->studentGroupModel::create([
                     'student_id' =>$student->id,
@@ -134,7 +134,7 @@ class StudentRepository implements StudentInterface {
                     'count' => $groups[$i][1],
                     'price' => $groups[$i][2],
                 ]);
-            //}
+//            }
         }
 
 
@@ -196,7 +196,7 @@ class StudentRepository implements StudentInterface {
         // TODO: Implement allStudent() method.
 
         $students = $this->userModel::whereHas('roleName', function ($q){
-            return $q->where([['is_teacher', 0], ['is_staff', 0]]);
+            return $q->where([['is_teacher', 0], ['is_staff', 0], ['is_admin', 0]]);
         })->withCount('studentGroups')->get();
 
 

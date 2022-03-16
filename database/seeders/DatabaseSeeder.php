@@ -24,14 +24,44 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
 
-        $roles = ['Admin', 'Teacher', 'Student', 'Support', 'Secretary'];
+//        $roles = ['Admin', 'Teacher', 'Student', 'Support', 'Secretary'];
+//
+//        foreach ($roles as $role){
+//            Role::create([
+//                'name' => $role,
+//            ]);
+//        }
 
-        foreach ($roles as $role){
+
+        Role::create([
+            'name' => 'Admin',
+            'is_teacher' => 0,
+            'is_staff' => 0,
+            'is_admin' => 1,
+        ]);
+        Role::create([
+            'name' => 'Teacher',
+            'is_teacher' => 1,
+            'is_staff' => 0,
+            'is_admin' => 0,
+        ]);
+        Role::create([
+            'name' => 'Student',
+            'is_teacher' => 0,
+            'is_staff' => 0,
+            'is_admin' => 0,
+        ]);
+        $roles = ['Support', 'Secretary'];
+
+        foreach ($roles as $role) {
             Role::create([
                 'name' => $role,
+                'is_teacher' => 0,
+                'is_staff' => 1,
+                'is_admin' => 0,
             ]);
-        }
 
+        }
 
 
 
@@ -41,7 +71,7 @@ class DatabaseSeeder extends Seeder
             examType::create([
                 'name' => $key,
                 'is_mark' => $value[0],
-                'choices' => $value[1],
+                'choice' => $value[1],
             ]);
         }
 
