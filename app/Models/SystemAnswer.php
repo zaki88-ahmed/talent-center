@@ -12,4 +12,10 @@ class SystemAnswer extends Model
 
     protected $fillable = ['question_id', 'answer'];
     protected $hidden = ['created_at', 'updated_at'];
+
+
+    public function question() {
+
+        return $this->belongsTo(Question::class, 'question_id', 'id');
+    }
 }

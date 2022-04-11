@@ -9,10 +9,12 @@ use App\Http\Traits\ApiDesignTrait;
 use App\Models\Exam;
 use App\Models\ExamMark;
 use App\Models\ExamType;
+use App\Models\Question;
 use App\Models\Role;
 use App\Models\StudentExam;
 use App\Models\StudentExamAnswer;
 use App\Models\StudentGroup;
+use App\Models\SystemAnswer;
 use App\Models\User;
 
 use App\Http\Interfaces\StaffInterface;
@@ -34,18 +36,22 @@ class ExamRepository implements ExamInterface
     private $studentExam;
     private $studentExamAnswer;
     private $examMark;
+    private $userModel;
+    private $question;
+    private $systemAnswerModel;
 
 
-    public function __construct(ExamType $examType, Exam $exam, StudentGroup $studentGroup, StudentExam  $studentExam, StudentExamAnswer $studentExamAnswer, ExamMark $examMark)
+    public function __construct(Question $question, User $user, ExamType $examType, Exam $exam, StudentGroup $studentGroup, StudentExam $studentExam, StudentExamAnswer $studentExamAnswer, ExamMark $examMark, SystemAnswer $systemAnswer)
     {
-
+        $this->userModel = $user;
         $this->examType = $examType;
         $this->exam = $exam;
         $this->studentGroup = $studentGroup;
         $this->studentExam = $studentExam;
         $this->studentExamAnswer = $studentExamAnswer;
         $this->examMark = $examMark;
-
+        $this->question = $question;
+        $this->systemAnswerModel = $systemAnswer;
     }
 
 
@@ -71,12 +77,14 @@ class ExamRepository implements ExamInterface
 
         if ($userRole == 'Teacher') {
 
-            $data = $this->exam->where('teacher_id', $userId)->get();
+            $data = $this->exam->where('teacher_id', $userId)->with('students')->get();
 
         } elseif ($userRole == 'Student') {
 
-            $data = $this->exam->whereHas('studentGroups', function ($q) use ($userId) {
-                $q->where([['student_id', $userId], ['count', '>=', 0]]);
+//            dd($userId);
+//            $data = $this->exam->with('students')->get();
+            $data = $this->exam->whereHas('students', function ($q) use ($userId) {
+                $q->where('student_id', $userId);
             })->get();
         }
 
@@ -220,10 +228,7 @@ class ExamRepository implements ExamInterface
         }
 
 
-//        $exam = $this->exam->find($request->exam_id);
-//        dd($exam);
-
-        $data = $this->studentExam::where('exam_id', $request->exam_id)->with('StudentData')->get();
+        $data = $this->exam::where('id', $request->exam_id)->with('students')->get();
 
         return $this->ApiResponse(200, 'Done',null ,$data);
     }
@@ -234,7 +239,7 @@ class ExamRepository implements ExamInterface
 
         $validation = Validator::make($request->all(), [
 
-            'student_exam_id' => 'required|exists:student_exams,id',
+            'student_exam_id' => 'required|exists:exams,id',
 
         ]);
 
@@ -242,40 +247,163 @@ class ExamRepository implements ExamInterface
             return $this->ApiResponse(422, 'Validation Errors', $validation->errors());
         }
 
-
-        $markedExam = $this->studentExam::where('id', $request->student_exam_id)
-            ->whereHas('examData', function ($q) {
-                $q->whereHas('examTypes', function ($q) {
-                    $q->where('is_mark', 1);
-                });
-            })->first();
-
+        $markedExam = $this->exam::where('id', $request->student_exam_id)
+            ->whereHas('examTypes', function ($q) {
+                $q->where('is_mark', 1);
+            })->with('questions')->first();
 
         if($markedExam){
 //            $data = $this->studentExamAnswer::where('student_exam_id', $request->student_exam_id)->with(['questionData', 'questionAnswer'])->get();
 
-            $data = $this->studentExamAnswer::where('student_exam_id', $request->student_exam_id)->with('questionData')->get();
+            return $this->ApiResponse(200, 'Done',null ,$markedExam);
 
-        }else{
-
-            $markedExam = $this->examMark::where('student_exam_id', $request->student_exam_id)->first();
-
-            if($markedExam){
-                $data = $this->studentExamAnswer::where('student_exam_id', $request->student_exam_id)->get();
-
-            }else{
-
-                $data = $this->studentExamAnswer::where('student_exam_id', $request->student_exam_id)
-                    ->with('questionData')->get(['id', 'question_id', 'answer']);
-
-            }
         }
-
-        return $this->ApiResponse(200, 'Done',null ,$data);
-
-
+            return $this->ApiResponse(200, 'Done',null ,'Exam Not Marked');
 
     }
 
+
+    public function newExams()
+    {
+        // TODO: Implement newExams() method.
+
+        $userId = auth()->user()->id;
+        $userRole = auth()->user()->roleName->name;
+
+        $data = $this->exam::where('is_closed', 0)->whereHas('students', function ($query) use($userId){
+            $query->where('student_id', $userId)->whereHas('groups', function ($query) {
+                $query->where('count', '>=', 1);
+            });
+        })->get();
+
+
+        return $this->apiResponse(200, 'New Exams', null, $data);
+    }
+
+
+    public function oldExams()
+    {
+        // TODO: Implement oldExams() method.
+        // TODO: Implement newExams() method.
+
+        $userId = auth()->user()->id;
+        $userRole = auth()->user()->roleName->name;
+
+        $data = $this->exam::where('is_closed', 1)->whereHas('students', function ($query) use($userId){
+            return $query->where('student_id', $userId);
+        })->get();
+
+
+
+        return $this->apiResponse(200, 'Old Exams', null, $data);
+
+    }
+
+
+
+
+    public function newStudentExam($request)
+    {
+        // TODO: Implement newStudentExam() method.
+
+
+        $validator = Validator::make($request->all(),[
+            'exam_id'  => 'required|exists:exams,id',
+        ]);
+
+        if($validator->fails()){
+            return $this->apiResponse(422,'Error',$validator->errors());
+        }
+        $userId = auth()->user()->id;
+
+        $exam = $this->exam->find($request->exam_id);
+
+
+        $questions = $this->question::whereHas('exams', function ($query) use($exam){
+            $query->where('exam_id', $exam->id)->where('is_closed', 0);
+        })->get();
+
+        return $this->apiResponse(200, 'Done', null, $questions);
+
+    }
+
+
+
+
+    public function storeStudentExam($request)
+    {
+        // TODO: Implement storeStudentExam() method.
+
+        $validator = Validator::make($request->all(),[
+            'exam_id'  => 'required|exists:exams,id',
+//            'question_id'  => 'required|exists:questions,id',
+            'answers'  => 'required|array',
+            'answers.*' => 'required|in:1,2,3,4',
+        ]);
+
+        if($validator->fails()){
+            return $this->apiResponse(422,'Error',$validator->errors());
+        }
+
+        $exam = $this->exam->find($request->exam_id);
+
+        $totalQuestionNum = $exam->questions->count();
+
+
+        $point = 0;
+        foreach ($exam->questions as $question) {
+            if(isset($request->answers[$question->id])){
+                $systemAnswer = $this->systemAnswerModel->where('question_id', $question->id)->first();
+                $userAns = $request->answers[$question->id];
+                $rightAns = $systemAnswer->answer;
+            }
+            if($userAns == $rightAns){
+                $point += 1;
+            }
+        }
+
+//        $questionIds = $exam->questions->pluck('id')->all();
+        $score = ($point/$totalQuestionNum) * 100;
+
+        $student = auth()->user();
+         $studentExam = $this->addStudentExam($exam->id, $student, $score);
+
+        $questionDegree = $exam->degree / $totalQuestionNum;
+
+        foreach ($exam->questions as $question) {
+            $this->addStudentExamAnswer($studentExam, $question, $request);
+        }
+
+        return $this->ApiResponse(200, 'Student Score ', null, "$score %");
+
+    }
+
+
+    public function addStudentExam($examId, $student, $score)
+    {
+        // TODO: Implement addStudentExam() method.
+
+        $data = [
+            'exam_id'  => $examId,
+            'student_id'  => $student->id,
+            'total_degree'  => $score,
+        ];
+          $student->exams()->attach($student->id, $data);
+        $pivotRow = $student->exams()->where('exam_id', $examId)->first();
+            return $pivotRow;
+    }
+
+
+    public function addStudentExamAnswer($studentExam, $question, $request)
+    {
+        // TODO: Implement addStudentExam() method.
+
+        $pivotRow = $this->studentExamAnswer::create([
+                'student_exam_id' => $studentExam->id,
+                'question_id' => $question->id,
+                'answer' => $request->answers[$question->id]
+            ]);
+        return $pivotRow;
+    }
 
 }

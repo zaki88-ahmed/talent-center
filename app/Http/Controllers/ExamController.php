@@ -85,6 +85,37 @@ class ExamController extends Controller
         return $this->examInterface->examStudentDetails($request);
     }
 
+//    public function addStudentExam(Request $request)
+//    {
+//        return $this->examInterface->addStudentExam($request);
+//    }
+
+
+    public function newExams()
+    {
+        return $this->examInterface->newExams();
+    }
+
+
+    public function oldExams()
+    {
+        return $this->examInterface->oldExams();
+    }
+
+
+
+    public function newStudentExam(Request $request)
+    {
+        return $this->examInterface->newStudentExam($request);
+    }
+
+
+
+    public function storeStudentExam(Request $request)
+    {
+        return $this->examInterface->storeStudentExam($request);
+    }
+
 
 
 

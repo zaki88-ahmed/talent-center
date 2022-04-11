@@ -22,7 +22,7 @@ class CreateStudentExamAnswersTable extends Migration
             $table->bigInteger('question_id')->unsigned();
             $table->foreign('question_id')->references('id')->on('questions')->onDelete('cascade');
 
-            $table -> double('degree');
+            $table -> double('answer');
 
             $table->timestamps();
         });

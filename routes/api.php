@@ -6,6 +6,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\StudentExamController;
+use App\Http\Controllers\SystemAnswerController;
 use App\Http\Controllers\TeachersController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -114,31 +115,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => 'roles:Admin.Support.Secr
     Route::post('teacher/update', [TeachersController::class, 'updateTeacher']);
 
 
-
-
-
-
 });
-
-
-
-
 
 /** Start EndUser Routes */
 Route::get('enduser/groups', [EndUserController::class, 'userGroups']);
 
-
-
 Route::group(['prefix' => 'teacher', 'middleware' => ['jwt.token', 'roles:Teacher']], function() {
-
-
-
-
-
-
-
-
-
 
     /** Start Exam Routes */
     Route::get('exams/types', [ExamController::class, 'examTypes']);
@@ -147,25 +129,22 @@ Route::group(['prefix' => 'teacher', 'middleware' => ['jwt.token', 'roles:Teache
     Route::post('exam/delete', [ExamController::class, 'deleteExam']);
     Route::post('exam/update', [ExamController::class, 'updateExam']);
     Route::post('exam/status/update', [ExamController::class, 'updateExamStatus']);
-
+    Route::post('students/exams/add', [ExamController::class, 'addStudentExam']);
 
 
     Route::get('exams/students', [ExamController::class, 'examStudents']);
     Route::get('exams/students/details', [ExamController::class, 'examStudentDetails']);
 
 
-
+    Route::get('answers/all', [SystemAnswerController::class, 'getAnswer']);
+    Route::post('answers/add', [SystemAnswerController::class, 'addAnswer']);
+    Route::post('answers/update', [SystemAnswerController::class, 'upadteAnswer']);
+    Route::post('answers/delete', [SystemAnswerController::class, 'deleteAnswer']);
 
     Route::post('questions/all', [QuestionController::class, 'allQuestions']);
     Route::post('question/add', [QuestionController::class, 'addQuestion']);
     Route::post('question/update', [QuestionController::class, 'updateQuestion']);
     Route::post('question/delete', [QuestionController::class, 'deleteQuestion']);
-
-
-
-
-
-
 
     /** Start File Routes */
     Route::post('file/add', [TeachersController::class, 'addFile']);
@@ -177,16 +156,14 @@ Route::group(['prefix' => 'teacher', 'middleware' => ['jwt.token', 'roles:Teache
 
 
 
-
-
 Route::group(['prefix' => 'student', 'middleware' => ['jwt.token', 'roles:Student']], function() {
 
-    Route::get('exams/new', [StudentExamController::class, 'newExams']);
-    Route::post('exams/student/new', [StudentExamController::class, 'newStudentExam']);
-    Route::post('exams/students/store', [StudentExamController::class, 'storeStudentExam']);
+    Route::get('exams/all', [ExamController::class, 'allExams']);
+    Route::post('exams/student/new', [ExamController::class, 'newStudentExam']);
+    Route::post('exams/students/store', [ExamController::class, 'storeStudentExam']);
 
-
-
+    Route::get('exams/new', [ExamController::class, 'newExams']);
+    Route::get('exams/old', [ExamController::class, 'oldExams']);
 
 
 

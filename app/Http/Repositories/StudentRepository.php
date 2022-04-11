@@ -39,10 +39,6 @@ class StudentRepository implements StudentInterface {
     {
         // TODO: Implement addStudent() method.
 
-
-
-
-
         $groupValidation = Validator::make($request->groups, [
             'group1.group_id' =>'min:3',
         ]);
@@ -76,16 +72,8 @@ class StudentRepository implements StudentInterface {
                     return $this->ApiResponse(200, 'Validation Error', 'Group Is Exist');
                 }
 
-
             }
         }
-
-
-
-
-
-
-
 
 //        $array = [];
 //
@@ -122,7 +110,7 @@ class StudentRepository implements StudentInterface {
 
         //dd(count($groups));
 
-        for ($i = 0; $i < count($groups); $i++) {
+            for ($i = 0; $i < count($groups); $i++) {
 //            for ($j = $i+1; $j <= count($groups) -1; $j++) {
 
 
@@ -136,14 +124,6 @@ class StudentRepository implements StudentInterface {
                 ]);
 //            }
         }
-
-
-
-
-
-
-
-
         return $this->ApiResponse(200, 'Student Was Created', null, $student);
 
 
@@ -171,24 +151,7 @@ class StudentRepository implements StudentInterface {
 //            ]);
 //        }
 
-
-
-
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     public function allStudents()
@@ -202,15 +165,6 @@ class StudentRepository implements StudentInterface {
 
         return $this->ApiResponse(200, 'Done', null, $students);
     }
-
-
-
-
-
-
-
-
-
 
 
     public function updateStudent($request)
@@ -228,9 +182,6 @@ class StudentRepository implements StudentInterface {
             return $this->ApiResponse(422, 'Validation Errors', $validation->errors());
         }
 
-
-
-
        if($request->has('groups')){
 
            $groups = $request->groups;
@@ -241,14 +192,11 @@ class StudentRepository implements StudentInterface {
                    if($groups[$i][0] == $groups[$j][0]){
                        return $this->ApiResponse(200, 'Validation Error', 'Group Is Exist');
                    }
-
-
                }
            }
        }
 
-
-
+//        dd('x');
         $requestedGroups = [];
 
         $student = $this->userModel::find($request->student_id);
@@ -260,11 +208,7 @@ class StudentRepository implements StudentInterface {
         ]);
 
 
-
-
         if($request->has('groups')){
-
-
 
 //            foreach ($request->groups as $group){
 //                $requestGroup = explode(',', $group);
@@ -299,11 +243,8 @@ class StudentRepository implements StudentInterface {
                         'count' => $groups[$i][1],
                         'price' => $groups[$i][2],
                     ]);
-
                 }
             }
-
-
 
         }
 
@@ -315,9 +256,6 @@ class StudentRepository implements StudentInterface {
 
         return $this->ApiResponse(200, 'Student Was Updated', null,  $student);
     }
-
-
-
 
 
     public function deleteStudent($request)
@@ -342,9 +280,6 @@ class StudentRepository implements StudentInterface {
 
 
     }
-
-
-
 
 
     public function specificStudent($request)

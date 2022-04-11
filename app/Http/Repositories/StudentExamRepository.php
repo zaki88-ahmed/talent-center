@@ -12,6 +12,7 @@ use App\Models\StudentExam;
 use App\Models\StudentExamAnswer;
 use App\Models\SystemAnswer;
 
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -24,13 +25,15 @@ class StudentExamRepository implements StudentExamInterface{
     private $studentExamModel;
     private $systemAnswerModel;
     private $studentExamAnswer;
+    private $userModel;
 
 
 
 
-    public function __construct(Exam $exam, Question $question, StudentExam $studentExam, SystemAnswer $systemAnswer, StudentExamAnswer $studentExamAnswer) {
+    public function __construct(User $user, Exam $exam, Question $question, StudentExam $studentExam, SystemAnswer $systemAnswer, StudentExamAnswer $studentExamAnswer) {
 
 
+        $this->userModel = $user;
         $this->examModel = $exam;
         $this->questionModel = $question;
         $this->studentExamModel = $studentExam;
@@ -47,27 +50,43 @@ class StudentExamRepository implements StudentExamInterface{
         $userId = auth()->user()->id;
         $userRole = auth()->user()->roleName->name;
 
-        $data = $this->examModel::where('is_closed', 0)->whereHas('studentGroups', function ($query) use($userId){
-            return $query->where([['student_id', $userId], ['count', '>=', 1]]);
+//        $data = $this->examModel::where('is_closed', 0)->whereHas('students', function ($query) use($userId){
+//            return $query->where([['student_id', $userId], ['count', '>=', 1]]);
+//        })->get();
+        $data = $this->examModel::where('is_closed', 0)->whereHas('students', function ($query) use($userId){
+             $query->where('student_id', $userId)->whereHas('groups', function ($query) {
+                 $query->where('count', '>=', 1);
+             });
         })->get();
+
 
         return $this->apiResponse(200, 'New Exams', null, $data);
     }
 
 
-
-
-
     public function oldExams()
     {
         // TODO: Implement oldExams() method.
+        // TODO: Implement newExams() method.
+
+        $userId = auth()->user()->id;
+        $userRole = auth()->user()->roleName->name;
+
+//        $data = $this->examModel::where('is_closed', 1)->whereHas('students', function ($query) use($userId){
+//            return $query->where('student_id', $userId);
+//        })->get();
+//        $data = $this->examModel::where('is_closed', 1)->whereHas('students', function ($query) use($userId){
+//            $query->where('student_id', $userId)->whereHas('groups', function ($query) {
+//                $query->where('count', '>=', 1);
+//            });
+//        })->get();
+        $data = $this->examModel::where('is_closed', 1)->whereHas('students', function ($query) use($userId){
+            return $query->where('student_id', $userId);
+        })->get();
 
 
 
-
-
-
-
+        return $this->apiResponse(200, 'Old Exams', null, $data);
 
     }
 
@@ -83,21 +102,39 @@ class StudentExamRepository implements StudentExamInterface{
         if($validator->fails()){
             return $this->apiResponse(422,'Error',$validator->errors());
         }
-
-        $questionsCount = $this->examModel::select('count')->find($request->exam_id);
+        $userId = auth()->user()->id;
+//        dd($userId);
+        $questionsCount = $this->examModel::find($request->exam_id);
 //        dd($questionsCount);
 
-        $questions = $this->questionModel->where('exam_id', $request->exam_id)->inRandomOrder()
-            ->Limit($questionsCount->count)-> with('questionImage')->get();
+//        $questions = $this->questionModel->where('exam_id', $request->exam_id)->inRandomOrder()
+//            ->Limit($questionsCount->count)-> with('questionImage')->get();
+
+        $exam = $this->examModel::where('id', $request->exam_id)->first();
+//        dd($exam);
+//        dd($exam->id);
+//        $questions = $this->questionModel::whereHas('exams', function ($query) use($exam){
+//            return $query->where('exam_id', $exam->id);
+//        })->whereHas('studentGroups', function ($query) use($userId){
+//        return $query->where('student_id', $userId);
+//        })
+//            ->Limit($questionsCount->count)-> with('questionImage')
+//            ->get();
+//        $questions = $this->questionModel::whereHas('exams', function ($query) use($exam){
+//            return $query->where('exam_id', $exam->id);
+//        })->get();
+//        dd($questions);
+
+        $questions = $this->questionModel::whereHas('exams', function ($query) use($exam, $userId){
+            $query->where('exam_id', $exam->id)->whereHas('students', function ($query)use($userId) {
+                $query->where('student_id', $userId);
+            });
+        })->get();
+//        dd($questions);
 
         return $this->apiResponse(200, 'Done', null, $questions);
 
     }
-
-
-
-
-
 
 
     public function storeStudentExam($request)
@@ -177,8 +214,8 @@ class StudentExamRepository implements StudentExamInterface{
 
         }
 
-
-
-
     }
+
+
+
 }

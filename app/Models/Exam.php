@@ -11,14 +11,13 @@ class Exam extends Model
 
     protected $hidden = ['created_at', 'updated_at'];
 
-    protected $fillable = ['name', 'start', 'end', 'time', 'degree', 'type_id', 'teacher_id', 'group_id', 'is_closed', 'count'];
+    protected $fillable = ['id', 'name', 'start', 'end', 'time', 'degree', 'type_id', 'teacher_id', 'group_id', 'is_closed', 'count'];
 
 
-    public function studentGroups(){
-
-        return $this->hasOne(StudentGroup::class, 'group_id', 'group_id');
-    }
-
+//    public function studentGroups(){
+//
+//        return $this->hasOne(StudentGroup::class, 'group_id', 'group_id');
+//    }
 
     public function examTypes(){
         return $this->belongsTo(ExamType::class, 'type_id', 'id');
@@ -35,6 +34,13 @@ class Exam extends Model
 
     public function teachers(){
         return $this->belongsTo(User::class, 'teacher_id', 'id');
+    }
+
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'student_exams', 'exam_id', 'student_id')
+            ->withPivot('total_degree')
+            ->withTimestamps();
     }
 
 

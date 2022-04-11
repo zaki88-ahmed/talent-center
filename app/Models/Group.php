@@ -13,10 +13,10 @@ class Group extends Model
 
 
 
-    public function groupStudents(){
-
-        return $this->hasMany(StudentGroup::class, 'group_id', 'id');
-    }
+//    public function groupStudents(){
+//
+//        return $this->hasMany(StudentGroup::class, 'group_id', 'id');
+//    }
 
     protected $hidden = ['created_at', 'updated_at', 'created_by'];
 
@@ -25,5 +25,12 @@ class Group extends Model
     public function examTypes(){
 
         return $this->hasOne(ExamType::class, 'type_id', 'id');
+    }
+
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'student_groups', 'group_id', 'student_id')
+            ->withPivot('count', 'price')
+            ->withTimestamps();
     }
 }

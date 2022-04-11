@@ -24,10 +24,25 @@ class User extends Authenticatable implements JWTSubject
 
 
 
-
-    public  function studentGroups(){
-        return $this->hasMany(StudentGroup::class, 'student_id', 'id');
+    public function exams()
+    {
+        return $this->belongsToMany(Exam::class, 'student_exams', 'student_id', 'exam_id')
+            ->withPivot('total_degree')
+            ->withTimestamps();
     }
+
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'student_groups', 'student_id', 'group_id')
+            ->withPivot( 'count', 'price')
+            ->withTimestamps();
+    }
+
+
+//    public  function studentGroups(){
+//        return $this->hasMany(StudentGroup::class, 'student_id', 'id');
+//    }
 
 
     // Rest omitted for brevity

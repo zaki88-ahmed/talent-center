@@ -24,5 +24,11 @@ interface ExamInterface {
 
     public function examStudentDetails($request);
 
+    public function newExams();
+    public function oldExams();
+
+    public function newStudentExam($request);
+    public function storeStudentExam($request);
+
 
 }

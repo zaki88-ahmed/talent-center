@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Interfaces\SystemAnswerInterface;
 use Illuminate\Support\ServiceProvider;
 
 
@@ -70,6 +71,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(
             'App\Http\Interfaces\StudentExamInterface',
             'App\Http\Repositories\StudentExamRepository'
+        );
+
+        $this->app->bind(
+            'App\Http\Interfaces\SystemAnswerInterface',
+            'App\Http\Repositories\SystemAnswerRepository'
         );
 
     }

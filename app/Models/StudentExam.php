@@ -14,16 +14,16 @@ class StudentExam extends Model
     protected $hidden = ['created_at', 'updated_at'];
 
 
-    public function examData(){
-
-        return $this->belongsTo(Exam::class, 'exam_id', 'id');
-    }
-
-
-
-    public function StudentData(){
-
-        return $this->belongsTo(User::class, 'student_id', 'id');
-    }
+//    public function examData(){
+//
+//        return $this->belongsTo(Exam::class, 'exam_id', 'id');
+//    }
+//
+//
+//
+//    public function StudentData(){
+//
+//        return $this->belongsTo(User::class, 'student_id', 'id');
+//    }
 
 }

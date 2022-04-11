@@ -42,11 +42,12 @@ class EndUserRepository implements EndUserInterface {
 
 //        dd('zz');
 
-
+//        dd(auth()->user());
         $userId = auth()->user()->id;
         $userRole = auth()->user()->roleName->name;
 //        dd($userId);
 //        dd($userRole);
+
 
         if($userRole == 'Teacher'){
 

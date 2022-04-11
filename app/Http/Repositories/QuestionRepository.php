@@ -47,8 +47,6 @@ class QuestionRepository implements QuestionInterface{
     }
 
 
-
-
     public function allQuestions($request)
     {
         // TODO: Implement allQuestions() method.
@@ -63,18 +61,10 @@ class QuestionRepository implements QuestionInterface{
             return $this->apiResponse(422,'Error',$validator->errors());
         }
 
-
-
         $data = $this->question->where('exam_id', $request->exam_id)->get();
-
         return $this->ApiResponse('200', 'All Questions', null, $data);
 
-
     }
-
-
-
-
 
     public function addQuestion($request)
     {
@@ -139,11 +129,7 @@ class QuestionRepository implements QuestionInterface{
 //        return $this->ApiResponse(200, 'Added Successfully', null, new ExamCollection($exam));
 //        return $this->ApiResponse(200, 'Added Successfully', null, ExamCollection:: collection($exam));
         return $this->ApiResponse(200, 'Added Successfully', null, new QuestionResource($question));
-
-
     }
-
-
 
 
     public function addQuestionAnswer($answer, $questionId){
@@ -153,14 +139,6 @@ class QuestionRepository implements QuestionInterface{
             'answer' => $answer,
         ]);
     }
-
-
-
-
-
-
-
-
 
 
     public function updateQuestion($request)
@@ -200,12 +178,7 @@ class QuestionRepository implements QuestionInterface{
         }
 
         return $this->apiResponse(200, 'Updated Successfully');
-
-
     }
-
-
-
 
 
     public function deleteQuestion($request)
