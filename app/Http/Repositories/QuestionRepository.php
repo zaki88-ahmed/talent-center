@@ -9,9 +9,11 @@ use App\Http\Resources\Resources\ExamCollection;
 use App\Http\Resources\Resources\QuestionResource;
 use App\Http\Traits\ApiDesignTrait;
 //use App\Models\role;
+use App\Http\Traits\UploadImageTrait;
 use App\Models\Exam;
 use App\Models\ExamType;
 use App\Models\Question;
+use App\Models\QuestionImage;
 use App\Models\Role;
 use App\Models\StudentGroup;
 use App\Models\SystemAnswer;
@@ -29,20 +31,23 @@ use phpDocumentor\Reflection\Types\Collection;
 class QuestionRepository implements QuestionInterface{
 
     use ApiDesignTrait;
+    use UploadImageTrait;
 
 
     private $question;
     private $exam;
     private $systemAnswer;
     private $examType;
+    private $questionImage;
 
 
-    public function __construct(Question $question, Exam $exam, SystemAnswer $systemAnswer, ExamType $examType) {
+    public function __construct(Question $question, Exam $exam, SystemAnswer $systemAnswer, ExamType $examType, QuestionImage $questionImage) {
 
         $this->question = $question;
         $this->exam = $exam;
         $this->systemAnswer = $systemAnswer;
         $this->examType = $examType;
+        $this->questionImage = $questionImage;
 
     }
 
@@ -76,37 +81,26 @@ class QuestionRepository implements QuestionInterface{
 
             'title' => 'required',
             'exam_id' => 'required|exists:exams,id',
-
+            'image' => 'required|mimes:png,jpg,jpeg|max:2048',
         ]);
 
         if($validator->fails()){
             return $this->apiResponse(422,'Errors',$validator->errors());
         }
 
-//        dd('aa');
-
         $question = $this->question->create([
-
             'title' => $request->title,
             'exam_id' => $request->exam_id,
         ]);
 
-//        dd('zz');
-
-//        $questionType = $this->examType::where([['is_mark', 1], ['choice', 1]])->first();
-
-//        $examType = $this->exam::where(['id', $request->exam_id])->whereHas('examTypes', function ($q) {
-//            $q->where([['is_mark', 1], ['choice', 1]]);
-//        })->first();
-
-//        dd($examType);
+        if($request->image){
+            $this->questionImage->create([
+                'image' => $this->uploadImage($request, 'question_image'),
+                'question_id' => $question->id
+            ]);
+        }
 
 
-//        if($examType){
-//            //Add Choice Answers
-//        }
-
-//        $exam = $this->exam->where('id', $request->exam_id)->AutomatedMarked(1)->first();
         $exam = $this->exam->where('id', $request->exam_id)->first();
 //        dd($exam);
 
@@ -123,11 +117,6 @@ class QuestionRepository implements QuestionInterface{
             $this->addQuestionAnswer($request->answer, $question->id);
             }
 
-//        dd($exam->with('questions'));
-
-//        return $this->ApiResponse(200, 'Added Successfully', null, $exam);
-//        return $this->ApiResponse(200, 'Added Successfully', null, new ExamCollection($exam));
-//        return $this->ApiResponse(200, 'Added Successfully', null, ExamCollection:: collection($exam));
         return $this->ApiResponse(200, 'Added Successfully', null, new QuestionResource($question));
     }
 
@@ -151,7 +140,7 @@ class QuestionRepository implements QuestionInterface{
 
             'title' => 'required',
             'question_id' => 'required|exists:questions,id',
-
+            'image' => 'required|mimes:png,jpg,jpeg|max:2048',
         ]);
 
 
@@ -161,11 +150,19 @@ class QuestionRepository implements QuestionInterface{
 
 
         $question = $this->question->find($request->question_id);
-//        dd($question->id);
+        $questionImage = $this->questionImage->where('question_id', $request->question_id)->first();
+//        dd($questionImage->image);
 
+        if($request->image){
+            $this->deleteImage('question_image', $questionImage->image);
+            $questionImage->delete();
+            $this->questionImage->create([
+                'image' => $this->uploadImage($request, 'question_image'),
+                'question_id' => $question->id
+            ]);
+        }
 
         $question->update([
-
             'title' => $request->title,
         ]);
 
@@ -188,6 +185,10 @@ class QuestionRepository implements QuestionInterface{
         $validator = Validator::make($request->all(),[
             'question_id' => 'required|exists:questions,id',
         ]);
+
+        $questionImage = $this->questionImage->where('question_id', $request->question_id)->first();
+        $this->deleteImage('question_image', $questionImage->image);
+        $questionImage->delete();
 
         if($validator->fails()){
             return $this->apiResponse(422,'Error',$validator->errors());

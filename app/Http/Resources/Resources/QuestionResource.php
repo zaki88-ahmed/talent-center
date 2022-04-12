@@ -18,6 +18,7 @@ class QuestionResource extends JsonResource
         return [
             'title' => $this->title,
             'exam_name' => $this->when($this->exams()->exists(), $this->exams->name),
+            'image' => $this->when($this->questionImage()->exists(), $this->questionImage),
         ];
     }
 }

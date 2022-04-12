@@ -11,18 +11,31 @@ trait UploadImageTrait{
 
 
 
-    public function uploadImage(Request $request, $path){
+//    public function uploadImage(Request $request, $path){
 
-        if($image = $request->file('image')){
-            $image = $request->file('image')->store($path);
+//        if($image = $request->file('image')){
+//            $image = $request->file('image')->store($path);
+//        }
+//        return $request->file('image')->hashName();
+//    }
+//
+//    public function deleteImage($path, $file){
+//        unlink(storage_path('app/public/' .  $path . '/' . $file));
+
+//    }
+
+
+
+        public function uploadImage(Request $request, $path){
+            if($image = $request->file('image')){
+                $image = $request->file('image')->store($path);
+            }
+            return $request->file('image')->hashName();
         }
-        return $request->file('image')->hashName();
-    }
-
-    public function deleteImage($path, $file){
-        unlink(storage_path('app/public/' .  $path . '/' . $file));
-    }
 
 
+        public function deleteImage($path, $file){
+            unlink(storage_path('app/public/' .  $path . '/' . $file));
+        }
 
 }
